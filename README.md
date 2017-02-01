@@ -10,14 +10,14 @@ To get you started with R Markdown and Github, I have detailed a few steps on ho
   3. Fork the repository (can be done in the web interface of GitHub)
   4. Clone the repository to your computer (no worries, this is only for *learning* how to do this, so nothing can break.) Click clone -> open in desktop.
   5. Choose a location on your hard drive for this "Forum" repository.
-  6. Create a branch on which to work. Name the branch "FIRSTNAME_LASTNAME"
-  7. Select `file > new Rmarkdown` in RStudio and create a file in the subfolder "exercise_guns/" in the forum folder. Use HTML as output format option.
+  6. Create a branch on which to work. Name the branch `FIRSTNAME_LASTNAME`
+  7. Select `file > new Rmarkdown` in RStudio and create a file in the subfolder `exercise_guns\` in the forum folder. Use HTML as output format option.
   8. Make sure your YAML Front Matter at the top of the document looks something like this:  
       title: "INTERESTING TITLE HERE"   
       author: "FIRST NAME LAST NAME"  
       date: "DATE"  
       tag: "guns"  
-  9. Save the file with the following naming convention: Guns_FIRSTNAME_LASTNAME.RMD in the subfolder "exercise_guns/".
+  9. Save the file with the following naming convention: `Guns_FIRSTNAME_LASTNAME.RMD` in the subfolder `exercise_guns\`.
   10. A: Go GitHub Desktop. You will see one or more uncommitted changes. Commit the changes (with some very short summary description, e.g "First commit".) 
   11. Press the "Sync" button to upload the file to GitHub.
   12. You can continue working on the file, exploring data, adding commits, uploading them etc. Save and commit frequently. You might choose just to commit changes to the Rmd, and then only include the html at the end. Then you can see (and share, and store) the entire history of the process.
