@@ -4,10 +4,6 @@ author: "Thomas Brambor"
 tag: "guns"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ## Exercise on Guns and Deaths in America
 
 - In preparation for your first homework assignment, I would like you to do an exploration of some data similar to what I will ask you next week for the first graded assignment.
