@@ -1,0 +1,148 @@
+---
+title: "Guns and Deaths in America"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exercise on Guns and Deaths in America
+
+- In preparation for your first homework assignment, I would like you to do an exploration of some data similar to what I will ask you next week for the first graded assignment.
+- This is not required. Choose to invest as little or as much time as you feel appropriate. But this is the way to learn and apply the things we cover in lecture and the tutorials I asked you to complete.
+- Advantage is that for this exercise you can share, ask questions freely, and get to know `ggplot2` better if you have not already.
+- I have collected a few data sources that may be helpful to the analysis. Feel free to use them, combine them, or add other sources if you feel ambitious.
+
+## Exercise on Guns and Deaths in America
+
+* *Task:* Explore the relationship between gun sales, gun ownership, gun laws, and gun-related deaths in America. 
+
+* Try to first *explore the data* and then think about which aspects of the things you learned you want to present to a reader. C
+
+## Datasource 1: Gunsales - NYTimes
+
+This is a dataset on monthly gunsales in the U.S. recorded by state from 1998--2016. The data is available [here](https://github.com/NYTimes/gunsales) on GitHub as well.
+
+```{r}
+library(gunsales)
+gun_sales <- analysis()
+str(gun_sales[,1:12])
+```
+
+## Datasource 1: Gunsales - NYTimes
+
+The NYTimes used the data for a story on ["What Happens After Calls for New
+Gun Restrictions? Sales Go Up"](https://www.nytimes.com/interactive/2015/12/10/us/gun-sales-terrorism-obama-restrictions.html) and accompanying data visualizations.
+
+![ ](NYTimes_gunsales.png){width=80%}
+
+## Datasource 1: Gunsales - NYTimes
+
+- the NYTimes `gunsales` package also contains some `ggplot' output. Take a look to see what they did and how it corresponds to their published graphs.
+
+```{r, eval=FALSE}
+plot_gunsales(gun_sales)    
+ggplot_gunsales(gun_sales)
+```
+
+## Datasource 2: Gun ownership survey data - Washington Post
+
+Other older data (2001) about gun ownership rates comes ffrom the [Washington post](http://www.washingtonpost.com/wp-srv/health/interactives/guns/ownership.html). Since this is for visualization purposes only, that's fine for us.
+
+First, let's read in the data:
+```{r}
+library(XML)
+library(dplyr)
+gun_ownership_url = 'http://www.washingtonpost.com/wp-srv/health/interactives/guns/ownership.html'
+gun_ownership = readHTMLTable(gun_ownership_url, header = TRUE, which = 1)
+gun_ownership = gun_ownership[-1, ]
+
+parse_num = function (x) as.numeric(sub(',', '', x))
+gun_ownership = select(gun_ownership, State = 1, Total = 2, Yes = 3,
+                       `Yes %` = 4, No = 5, `No %` = 6) %>%
+                        mutate_each(funs(parse_num), -State)
+head(gun_ownership)
+```
+
+## Datasource 2: Gun ownership survey data - Washington Post
+
+According to the description, the “*” annotation next to a state name indicates that the state possesses child access prevention laws, according to the website. Let’s include this info as a data column.
+
+```{r}
+gun_ownership = gun_ownership %>%
+    mutate(`Child access prevention` = grepl('\\*$', State),
+           State  = sub('\\*$', '', State))
+
+# Fix D.C. name
+gun_ownership[gun_ownership$State == 'The District', 'State'] = 'District of Columbia' 
+```
+
+## Datasource 3: Deaths due to firearms by state - Kaiser Family Foundation
+
+Another piece of information about the [number of deaths due to injury by firearms presented by the Kaiser Foundation](http://kff.org/other/state-indicator/firearms-death-rate-per-100000/?currentTimeframe=0) (and assembled from publications by the Centers for Disease Control and Prevention).
+
+setwd("/Users/tbrambor/Dropbox (Pflegedienst Brambor)/Courses/Planning/2016 Spring - QMSS Columbia - Data Visualization/Lectures/Week 02 - Cont GGPlot2/Guns and Deaths in America")
+
+```{r}
+# Website appears to block scraping, but allows downloading data.
+# gun_deaths_url = 'http://kff.org/other/state-indicator/firearms-death-rate-per-100000/'
+# gun_deaths = readHTMLTable(gun_deaths_url)
+# Instead, we use the manually downloaded CSV output.
+gun_deaths = read.csv("KFF_deaths_firearms.csv", skip = 3) %>%
+    select(State = 1, `Deaths per 100000` = 2)
+
+head(gun_deaths)
+```
+
+## Dataset 4: Gun-related deaths at the invidual level (2012-2014)
+
+- FiveThirtyEight has explored the data on the 33,000 annual gun deaths in America in multiple articles (including this [interactive feature](https://fivethirtyeight.com/features/gun-deaths/)) in their "Gun Death in America" project. 
+
+- The data comes from the Centers for Disease Control and Prevention’s Multiple Cause of Death database, which is derived from death certificates from all 50 states and the District of Columbia and is widely considered the most comprehensive estimate of firearm deaths.
+
+- The data is available [on GitHub here](https://github.com/fivethirtyeight/guns-data).
+
+## Dataset 4: Gun-related deaths at the invidual level (2012-2014)
+
+```{r, warning=FALSE, comment=FALSE}
+library(readr)
+gun_inddeaths <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/guns-data/master/full_data.csv")
+gun_inddeaths <- gun_inddeaths[,2:dim(gun_inddeaths)[2]]
+
+head(gun_inddeaths)
+```
+
+
+## Possible Questions to explore with these data (feel free to explore what you think is interesting)
+
+- Does gun ownership correlate with firearm deaths in the U.S.? Does the pattern hold only in the aggregate or also by state? 
+- What is the pattern of gunsales over time?  
+- What are the individual level patterns of gun deaths? Are gun regulations (e.g. child access prevention laws) associated with lower gun death rates? How about suicides (especially by non-adults)?
+
+## Sharing you explorations and insights
+
+- Try using R Markdown and GitHub to start sharing your results with me and everyone in the class. 
+
+- Use R-Studio to create a markdown file with your code, some comments on the process and your output, any snags or bugs your ran into.
+
+## Steps for R Markdown + GitHub in detail
+
+- Follow these steps:
+  1. Open a GitHub account (if you don't have one). Please use your Columbia-email to benefit from private repositories. Install their dektop client (if you are new to Git): https://desktop.github.com/
+  2. Go to https://github.com/Columbia-University-QMSS/dataviz-forum 
+  3. Fork the repository (can be done in the web interface of GitHub)
+  4. Clone the repository to your computer (no worries, this is only for *learning* how to do this, so nothing can break.) Click clone -> open in desktop.
+  5. Choose a location on your hard drive for this "Forum" repository.
+  6. Create a branch on which to work. Name the branch "FIRSTNAME_LASTNAME"
+  7. Select `file > new Rmarkdown` in RStudio and create a file in the subfolder "exercise_guns/" in the forum folder. Use HTML as output format option.
+  8. Make sure your YAML Front Matter at the top of the document looks something like this:
+      title: "INTERESTING TITLE HERE"
+      author: "FIRST NAME LAST NAME"
+      date: "DATE"
+      tag: "guns"
+  9. Save the file with the following naming convention: Guns_FIRSTNAME_LASTNAME.RMD in the subfolder "exercise_guns/".
+  10. A: Go GitHub Desktop. You will see one or more uncommitted changes. Commit the changes (with some very short summary description, e.g "First commit".) 
+  11. Press the "Sync" button to upload the file to GitHub.
+  12. You can continue working on the file, exploring data, adding commits, uploading them etc. Save and commit frequently. You might choose just to commit changes to the Rmd, and then only include the html at the end. Then you can see (and share, and store) the entire history of the process.
+  13. When you are done (but before class) open a pull request open a pull request for your branch targeting the forum master repo. This is how I know you are done as well.
