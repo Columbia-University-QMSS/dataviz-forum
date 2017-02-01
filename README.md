@@ -1,7 +1,7 @@
 # dataviz-forum
 This will serve as the public forum repository for the QMSS - Data Visualization course to which anyone can post. [Don't put your graded homework here!]
 
-To get you started with R Markdown and Github, I have detailed a few steps on how to share your explorations for [this week's data extercise on guns and deaths in America](exercise_guns/_guns_exercise.Rmd)
+To get you started with R Markdown and Github, I have detailed a few steps on how to share your explorations for [this week's data extercise on guns and deaths in America](exercise_guns/exercise/_guns_exercise.Rmd)
 
 ## Steps for R Markdown + GitHub in detail
 
