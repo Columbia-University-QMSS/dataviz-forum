@@ -12,7 +12,7 @@ To get you started with R Markdown and Github, I have detailed a few steps on ho
   5. Choose a location on your hard drive for this "Forum" repository.
   6. Create a branch on which to work. Name the branch "FIRSTNAME_LASTNAME"
   7. Select `file > new Rmarkdown` in RStudio and create a file in the subfolder "exercise_guns/" in the forum folder. Use HTML as output format option.
-  8. Make sure your YAML Front Matter at the top of the document looks something like this:
+  8. Make sure your YAML Front Matter at the top of the document looks something like this:  
       title: "INTERESTING TITLE HERE"   
       author: "FIRST NAME LAST NAME"  
       date: "DATE"  
