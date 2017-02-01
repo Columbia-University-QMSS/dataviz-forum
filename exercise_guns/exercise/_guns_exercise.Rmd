@@ -1,6 +1,7 @@
 ---
 title: "Guns and Deaths in America"
-output: html_document
+author: "Thomas Brambor"
+tag: "guns"
 ---
 
 ```{r setup, include=FALSE}
@@ -128,7 +129,6 @@ head(gun_inddeaths)
 
 ## Steps for R Markdown + GitHub in detail
 
-- Follow these steps:
   1. Open a GitHub account (if you don't have one). Please use your Columbia-email to benefit from private repositories. Install their dektop client (if you are new to Git): https://desktop.github.com/
   2. Go to https://github.com/Columbia-University-QMSS/dataviz-forum 
   3. Fork the repository (can be done in the web interface of GitHub)
@@ -145,4 +145,4 @@ head(gun_inddeaths)
   10. A: Go GitHub Desktop. You will see one or more uncommitted changes. Commit the changes (with some very short summary description, e.g "First commit".) 
   11. Press the "Sync" button to upload the file to GitHub.
   12. You can continue working on the file, exploring data, adding commits, uploading them etc. Save and commit frequently. You might choose just to commit changes to the Rmd, and then only include the html at the end. Then you can see (and share, and store) the entire history of the process.
-  13. When you are done (but before class) open a pull request open a pull request for your branch targeting the forum master repo. This is how I know you are done as well.
+  13. When you are done (but before class) open a pull for your branch targeting the forum master repo. This is how I know you are done as well.
