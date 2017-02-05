@@ -6,26 +6,70 @@ output: html_document
 tag: guns
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+ ## Datasource 1: Gunsales - NYTimes
+```{r}
+library(gunsales)
+ gun_sales <- analysis()
+ str(gun_sales[,1:12])
+ plot_gunsales(gun_sales)    
+ ggplot_gunsales(gun_sales)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+## Datasource 2: Gun ownership survey data - Washington Post
+```{r}
+library(XML)
+library(dplyr)
+gun_ownership_url = 'http://www.washingtonpost.com/wp-srv/health/interactives/guns/ownership.html'
+gun_ownership = readHTMLTable(gun_ownership_url, header = TRUE, which = 1)
+gun_ownership = gun_ownership[-1, ]
+ 
+parse_num = function (x) as.numeric(sub(',', '', x))
+gun_ownership = select(gun_ownership, State = 1, Total = 2, Yes = 3,
+                        `Yes %` = 4, No = 5, `No %` = 6) %>%
+                         mutate_each(funs(parse_num), -State)
+head(gun_ownership)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+##Add child access protection column
+```{r}
+gun_ownership = gun_ownership %>%
+     mutate(`Child access prevention` = grepl('\\*$', State),
+            State  = sub('\\*$', '', State))
+ 
+# Fix D.C. name
+gun_ownership[gun_ownership$State == 'The District', 'State'] = 'District of Columbia' 
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+## Datasource 3: Deaths due to firearms by state - Kaiser Family Foundation
+```{r}
+setwd("/Users/rebeccaportman/Desktop/Spring 2017/Data Viz/DataViz")
+gun_deaths = read.csv("KFF_deaths_firearms.csv", skip = 3) %>%
+     select(State = 1, `Deaths per 100000` = 2)
+head(gun_deaths)
+
+```
+##Data Source 4: Gun-Related Deaths at the individual level
+```{r}
+library(readr)
+gun_inddeaths <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/guns-data/master/full_data.csv")
+gun_inddeaths <- gun_inddeaths[,2:dim(gun_inddeaths)[2]]
+
+head(gun_inddeaths)
+```
+
+#Data Manipulation
+```{r}
+state_names <- gun_deaths$State[2:52]
+state_gun_deaths <- gun_deaths$`Deaths per 100000`[2:52]
+state_gun_ownership <- gun_ownership$`Yes %`[2:52]
+state_comparison <- data.frame(state_names, state_gun_deaths, state_gun_ownership)
+```
+
+##Exploratory Data Analysis
+```{r}
+library(ggplot2)
+ggplot(data = state_comparison) + geom_point(mapping = aes(x = state_gun_ownership, y = state_gun_deaths))
+```
+
