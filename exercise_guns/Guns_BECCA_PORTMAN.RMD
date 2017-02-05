@@ -70,6 +70,14 @@ state_comparison <- data.frame(state_names, state_gun_deaths, state_gun_ownershi
 ##Exploratory Data Analysis
 ```{r}
 library(ggplot2)
-ggplot(data = state_comparison) + geom_point(mapping = aes(x = state_gun_ownership, y = state_gun_deaths))
+stategraph <- ggplot(data = state_comparison) + geom_point(mapping = aes(x = state_gun_ownership, y = state_gun_deaths))
 ```
 
+I see a pretty clear positive trend here with an increase in gun ownership correlating with an increase in gun deaths. It's important to note, though, that the ownership data is from 2001 while the death data is from 2014, so not the best comparison.
+
+```{r}
+state_comparison$CAP <- gun_ownership$`Child access prevention`[2:52]
+ggplot(data = state_comparison) + geom_point(mapping = aes(x = state_gun_ownership, y = state_gun_deaths, color = CAP))
+```
+
+Adding in color to separate between those states with child access prevention laws and those without, the ones without laws seem to be concentrated in the higher end of gun ownership and deaths.
