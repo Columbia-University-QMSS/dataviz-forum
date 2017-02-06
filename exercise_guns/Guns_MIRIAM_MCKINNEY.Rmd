@@ -1,9 +1,9 @@
 ---
-title: "Github Exercise"
-author: "Michael Haupt"
-date: "2/3/2017"
-output: html_document
+title: "Interesting Title Here"
+author: "Miriam McKinney"
+date: "February 3, 2017"
 tag: "guns"
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
