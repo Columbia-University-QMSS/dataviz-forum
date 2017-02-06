@@ -5,26 +5,93 @@ date: "2/4/2017"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+## Possible Questions to explore with these data (feel free to explore what you think is interesting)
+
+- Does gun ownership correlate with firearm deaths in the U.S.? Does the pattern hold only in the aggregate or also by state? 
+- What is the pattern of gunsales over time?  
+- What are the individual level patterns of gun deaths? Are gun regulations (e.g. child access prevention laws) associated with lower gun death rates? How about suicides (especially by non-adults)?
+
+## Datasource 1: Gunsales - NYTimes
+
+```{r}
+stopifnot(require(gunsales))
+stopifnot(require(ggplot2))
+stopifnot(require(dplyr))
+
+gun_sales <- analysis()
+str(gun_sales[,1:12])
+
+
 ```
 
-## R Markdown
+## Datasource 2: Gun ownership survey data - Washington Post
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r}
+library(XML)
+library(dplyr)
+gun_ownership_url = 'http://www.washingtonpost.com/wp-srv/health/interactives/guns/ownership.html'
+gun_ownership = readHTMLTable(gun_ownership_url, header = TRUE, which = 1)
+gun_ownership = gun_ownership[-1, ]
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+parse_num = function (x) as.numeric(sub(',', '', x))
+gun_ownership = select(gun_ownership, State = 1, Total = 2, Yes = 3,
+                       `Yes %` = 4, No = 5, `No %` = 6) %>%
+                        mutate_each(funs(parse_num), -State)
+head(gun_ownership)
 ```
 
-## Including Plots
+fix state names:
+```{r}
+gun_ownership = gun_ownership %>%
+    mutate(`Child access prevention` = grepl('\\*$', State),
+           State  = sub('\\*$', '', State))
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+# Fix D.C. name
+gun_ownership[gun_ownership$State == 'The District', 'State'] = 'District of Columbia' 
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Datasource 3: Deaths due to firearms by state - Kaiser Family Foundation
+
+```{r}
+setwd("/Users/shilpasure/Documents/Grad School/Columbia/Spring 2017/Data Visualization/dataviz-forum/exercise_guns/exercise")
+
+gun_deaths <- read.csv("KFF_deaths_firearms.csv", skip = 3) %>%
+    select(State = 1, `Deaths per 100000` = 2)
+
+head(gun_deaths)
+```
+
+## Dataset 4: Gun-related deaths at the invidual level (2012-2014)
+
+```{r, warning=FALSE, comment=FALSE}
+library(readr)
+gun_inddeaths <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/guns-data/master/full_data.csv")
+gun_inddeaths <- gun_inddeaths[,2:dim(gun_inddeaths)[2]]
+
+head(gun_inddeaths)
+```
+
+## Questions
+
+- Does gun ownership correlate with firearm deaths in the U.S.? Does the pattern hold only in the aggregate or also by state? 
+
+```{r}
+# use Washington post gun ownership
+head(gun_ownership)
+
+# In 2001 the Behavioral Risk Factor Surveillance System (BRFSS) in North Carolina surveyed 201,881 respondents nationwide, asking them, "Are any firearms now kept in or around your home? Include those kept in a garage, outdoor storage area, car, truck, or other motor vehicle." Here are the results.
+
+# use KFF data for Deaths per 100000
+head(gun_deaths)
+
+gun_ownerships_deaths <- merge(gun_ownership, gun_deaths, by="State")
+
+colnames(gun_ownerships_deaths) <- c("State", "Total", "Yes", "Yes_perc", "No", "No_perc", "Child_access_prevention", "Deaths_per_100000")
+
+ggplot(gun_ownerships_deaths, aes(Yes_perc, Deaths_per_100000)) + geom_point()
+```
+
+```{r}
+# figure out how to merge gun_sales and gun_inddeaths by year and month
+
+```
