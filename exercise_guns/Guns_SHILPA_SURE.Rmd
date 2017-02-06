@@ -5,12 +5,6 @@ date: "2/4/2017"
 output: html_document
 ---
 
-## Possible Questions to explore with these data (feel free to explore what you think is interesting)
-
-- Does gun ownership correlate with firearm deaths in the U.S.? Does the pattern hold only in the aggregate or also by state? 
-- What is the pattern of gunsales over time?  
-- What are the individual level patterns of gun deaths? Are gun regulations (e.g. child access prevention laws) associated with lower gun death rates? How about suicides (especially by non-adults)?
-
 ## Datasource 1: Gunsales - NYTimes
 
 ```{r}
@@ -20,7 +14,6 @@ stopifnot(require(dplyr))
 
 gun_sales <- analysis()
 str(gun_sales[,1:12])
-
 
 ```
 
