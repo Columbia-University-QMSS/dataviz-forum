@@ -76,20 +76,22 @@ head(gun_inddeaths)
 - Does gun ownership correlate with firearm deaths in the U.S.? Does the pattern hold only in the aggregate or also by state? 
 
 ```{r}
-# use Washington post gun ownership
+# use Washington post gun ownership for gun ownership by state
 head(gun_ownership)
 
 # In 2001 the Behavioral Risk Factor Surveillance System (BRFSS) in North Carolina surveyed 201,881 respondents nationwide, asking them, "Are any firearms now kept in or around your home? Include those kept in a garage, outdoor storage area, car, truck, or other motor vehicle." Here are the results.
 
-# use KFF data for Deaths per 100000
+# use KFF data for Deaths per 100000 by state
 head(gun_deaths)
 
 gun_ownerships_deaths <- merge(gun_ownership, gun_deaths, by="State")
 
 colnames(gun_ownerships_deaths) <- c("State", "Total", "Yes", "Yes_perc", "No", "No_perc", "Child_access_prevention", "Deaths_per_100000")
 
-ggplot(gun_ownerships_deaths, aes(Yes_perc, Deaths_per_100000)) + geom_point()
+ggplot(gun_ownerships_deaths, aes(Yes_perc, Deaths_per_100000)) + geom_point() + geom_text(data=subset(gun_ownerships_deaths, Yes_perc < 10 & Deaths_per_100000 > 10 | Deaths_per_100000 > 17), aes(Yes_perc, Deaths_per_100000, label=State))
 ```
+
+From this plot we can see that there is a clear positive correlation between the percentage of people who report owning a gun in their home and firearms deaths per state. Louisiana, Alaska, and Mississippi have the highest humber of firearms deaths per 100,000 people. Washington, DC is an unusual case of having a small percentage of people owning a gun but a relatively high number of gun deaths. 
 
 ```{r}
 # figure out how to merge gun_sales and gun_inddeaths by year and month
