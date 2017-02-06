@@ -6,26 +6,32 @@ output: html_document
 tag: "guns"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+library(ggplot2)
+library(dplyr)
+library(RColorBrewer)
+
+d <- read.csv("KFF_deaths_firearms.csv", skip = 3) %>%
+  select(State = 1, 'Deaths per 100000' = 2)
+head(d)
+
+sub <- d[1:52, ]
+names(sub)[names(sub) == "Deaths per 100000"] <- "Deaths"
+sub$Death_Cuts <- ifelse(sub$Deaths <= 5, "5 Million or Less", ifelse(sub$Deaths > 5 & sub$Deaths <= 10, "Between 5 Million and 10 Million", ifelse(sub$Deaths > 10 & sub$Deaths <= 15, "Between 10 Million and 15 Million", "More than 15 Million")))
+sub$Death_Cuts[1] <- "United States Total Average"
+sub$Death_Cuts <- factor(sub$Death_Cuts, levels = c("United States Total Average", "5 Million or Less", "Between 5 Million and 10 Million", "Between 10 Million and 15 Million", "More than 15 Million"))
+
+View(sub)
+
+g <- ggplot(sub, mapping = aes(x = State, y = Deaths, fill = Death_Cuts))
+g <- g + geom_bar(stat = "identity")
+g <- g + scale_fill_manual("Legend", values = c("red", "gray80", "grey55", "grey25", "black"))
+g <- g + coord_flip()
+g <- g + ylab("Deaths per 100000")
+g <- g + ggtitle("Number of Deaths Due to Firearms by State")
+g <- g + theme_minimal()
+g
+
+
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
