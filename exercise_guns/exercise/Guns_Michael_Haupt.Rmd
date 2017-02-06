@@ -30,7 +30,11 @@ g <- g + ylab("Deaths per 100000")
 g <- g + ggtitle("Number of Deaths Due to Firearms by State")
 g <- g + theme_minimal()
 g
-
-
 ```
+
+## Geography and Firearm Injuries
+
+It appears that the states that are more rural with less population density (such as Wyoming, Alaska, and Oklahoma) all appear to have higher amounts of deaths due to firearms when compared to the national average. This is kind of surprising that these states with lower populations have fewer deaths per 100000 people compared to the more populated states (as seen with New York and California that both have lower numbers than the national average). 
+
+
 
