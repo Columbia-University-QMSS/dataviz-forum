@@ -1,5 +1,6 @@
 Mike Jaron, mj2776, repository
 
+
 # dataviz-forum
 This will serve as the public forum repository for the QMSS - Data Visualization course to which anyone can post. [Don't put your graded homework here!]
 
