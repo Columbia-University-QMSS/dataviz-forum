@@ -1,0 +1,80 @@
+---
+title: "Guns"
+author: "JACK HOLDER"
+date: "2/2/2017"
+output: html_document
+tag: "guns"
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading packages
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(gunsales)
+library(ggthemes)
+library(XML)
+```
+
+
+## Loading the data
+
+```{r}
+# NYT
+load("/Users/jackholder/Downloads/alldata.RData")
+gun_nyt <- alldata
+
+# Washington Post
+gun_ownership_url = 'http://www.washingtonpost.com/wp-srv/health/interactives/guns/ownership.html'
+gun_wp = readHTMLTable(gun_ownership_url, header = TRUE, which = 1)
+gun_wp = gun_wp[-1, ]
+parse_num = function (x) as.numeric(sub(',', '', x))
+gun_wp = select(gun_wp, State = 1, Total = 2, Yes = 3,
+                       `Yes %` = 4, No = 5, `No %` = 6) %>%
+                        mutate_each(funs(parse_num), -State)
+
+gun_wp = gun_wp %>%
+    mutate(`Child access prevention` = grepl('\\*$', State),
+           State  = sub('\\*$', '', State))
+
+gun_wp[gun_wp$State == 'The District', 'State'] = 'District of Columbia' 
+
+# Kaiser Foundation
+
+gun_kf = read.csv("~/Documents/Columbia/Data Visualization/raw_data.csv", skip = 3) %>%
+    select(State = 1, `Deaths per 100000` = 2)
+```
+
+
+The `gunsales` package didn't work initially, so I decided to try and recreate it myself.... that's two hours of my life I'll never get back!!!
+
+```{r}
+
+nyt_sales <- gun_nyt %>%
+  mutate(Date = paste(year, month, sep = "-")) %>%
+  mutate(Date = paste0(Date, "-01")) %>%
+  mutate(Date = as.Date(Date, "%Y-%B-%d")) %>%
+  group_by(Date) %>%
+  arrange(desc(Date)) %>%
+  summarise(Total = sum(guns_sold))
+
+gg <- ggplot(nyt_sales, aes(x = Date, y = Total/1000000, group = 1))
+gg <- gg + geom_point() +
+  geom_smooth() +
+  ggtitle("Total U.S. gun sales") + 
+  ylab("Gun Sales (millions)") +
+  theme_economist()
+gg
+```
+
+Then of course I worked out why it wasn't working.
+
+```{r}
+gun_sales <- analysis()
+ggplot_gunsales(gun_sales)
+```
