@@ -81,3 +81,13 @@ ggplot(data = state_comparison) + geom_point(mapping = aes(x = state_gun_ownersh
 ```
 
 Adding in color to separate between those states with child access prevention laws and those without, the ones without laws seem to be concentrated in the higher end of gun ownership and deaths.
+
+```{r}
+by_year <- group_by(gun_sales, year)
+yearlytotal <- summarise(by_year, total = sum(guns_total))
+per1000 <- summarise(by_year, average_per_1000 = mean(guns_total_per_1000))
+yearlysales <- data.frame(yearlytotal, per1000)
+gun_sales$date <- paste(gun_sales$year, gun_sales$month, sep="-")
+ggplot(data = yearlysales) + geom_smooth(mapping = aes(x = year, y = average_per_1000))
+```
+
