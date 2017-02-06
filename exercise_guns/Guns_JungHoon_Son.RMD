@@ -1,0 +1,60 @@
+---
+title: "Guns Exercise"
+author: "Jung Hoon Son"
+date: "February 6, 2017"
+tag: "guns"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Datasource 1: Gunsales - NYTimes
+******
+
+1. Load the __gunsales__ library. 
+2. __analysis()__ (not sure what it does). 
+3. Display structure of **gun_sales**.
+
+```{r}
+library(gunsales)
+gun_sales <- analysis()
+str(gun_sales[,1:12])
+```
+******
+
+```{r echo=FALSE}
+plot_gunsales(gun_sales)    
+ggplot_gunsales(gun_sales)
+```
+******
+## Datasource 2: Gun ownership survey data - Washington Post
+******
+
+
+```{r}
+library(XML)
+library(dplyr)
+gun_ownership_url = 'http://www.washingtonpost.com/wp-srv/health/interactives/guns/ownership.html'
+gun_ownership = readHTMLTable(gun_ownership_url, header = TRUE, which = 1)
+gun_ownership = gun_ownership[-1, ]
+
+parse_num = function (x) as.numeric(sub(',', '', x))
+gun_ownership = select(gun_ownership, State = 1, Total = 2, Yes = 3,
+                       `Yes %` = 4, No = 5, `No %` = 6) %>%
+                        mutate_each(funs(parse_num), -State)
+head(gun_ownership)
+```
+******
+
+## Datasource 2: Gun ownership survey data - Washington Post
+******
+
+```{r}
+gun_ownership = gun_ownership %>%
+    mutate(`Child access prevention` = grepl('\\*$', State),
+           State  = sub('\\*$', '', State))
+
+# Fix D.C. name
+gun_ownership[gun_ownership$State == 'The District', 'State'] = 'District of Columbia'
+```
