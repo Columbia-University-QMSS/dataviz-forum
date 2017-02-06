@@ -21,7 +21,6 @@ sub$Death_Cuts <- ifelse(sub$Deaths <= 5, "5 Million or Less", ifelse(sub$Deaths
 sub$Death_Cuts[1] <- "United States Total Average"
 sub$Death_Cuts <- factor(sub$Death_Cuts, levels = c("United States Total Average", "5 Million or Less", "Between 5 Million and 10 Million", "Between 10 Million and 15 Million", "More than 15 Million"))
 
-View(sub)
 
 g <- ggplot(sub, mapping = aes(x = State, y = Deaths, fill = Death_Cuts))
 g <- g + geom_bar(stat = "identity")
