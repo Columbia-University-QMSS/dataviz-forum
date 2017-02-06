@@ -73,6 +73,8 @@ head(gun_inddeaths)
 
 ## Questions
 
+# Question 1
+
 - Does gun ownership correlate with firearm deaths in the U.S.? Does the pattern hold only in the aggregate or also by state? 
 
 ```{r}
@@ -93,7 +95,14 @@ ggplot(gun_ownerships_deaths, aes(Yes_perc, Deaths_per_100000)) + geom_point() +
 
 From this plot we can see that there is a clear positive correlation between the percentage of people who report owning a gun in their home and firearms deaths per state. Louisiana, Alaska, and Mississippi have the highest humber of firearms deaths per 100,000 people. Washington, DC is an unusual case of having a small percentage of people owning a gun but a relatively high number of gun deaths. 
 
+# Question 2
+
+- What is the pattern of gunsales over time?  
+
 ```{r}
-# figure out how to merge gun_sales and gun_inddeaths by year and month
+
+ggplot(gun_sales, aes(factor(year), guns_total)) + geom_boxplot() 
 
 ```
+
+From ths boxplot of gun sales by month (displayed by year), it appears that gun sales have been increasing overall between 2000 and 2016. There were unusually high sales in one month in 2012 and one month in 2015.
