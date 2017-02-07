@@ -2,8 +2,8 @@
 title: "Guns Exercise"
 author: "Jung Hoon Son"
 date: "February 6, 2017"
-tag: "guns"
 output: html_document
+tag: "guns"
 ---
 
 ```{r setup, include=FALSE}
@@ -23,8 +23,8 @@ str(gun_sales[,1:12])
 ```
 ******
 ```{r}
-plot_gunsales(gun_sales)    
-ggplot_gunsales(gun_sales)
+#plot_gunsales(gun_sales)
+#ggplot_gunsales(gun_sales)
 ```
    
 ******
@@ -190,4 +190,30 @@ gun_inddeaths %>%
   labs(title="Gun Suicides of Non-adults over time (2012-2015)",
        y="Deaths",
        x="Date")
+```
+
+### Gun-related deaths vs. State population
+```{r}
+pop_density<-read.csv('pop_density.csv',skip=3,header=TRUE)
+population<-pop_density[2:52,c(12)]
+pop_death<-cbind(gun_deaths[2:52,],pop_density[2:52,c(1,12,23)],child_regulation=gun_ownership[2:52,c(7)])
+pop_death<-droplevels(pop_death)
+pop_death$X2010_DENSITY<-as.numeric(gsub(",","",levels(pop_death$X2010_DENSITY)[pop_death$X2010_DENSITY]))
+pop_death
+names(pop_death)[2]<-"death_rate"
+
+```
+
+### Gun-related deaths vs. Population density
+```{r}
+ggplot(pop_death[-9,],aes(X2010_DENSITY,
+                          death_rate,
+                          label=State,
+                          colour=child_regulation)) + 
+  geom_point() +
+  geom_text(size=3,
+            vjust = 0,
+            nudge_y = 0.2, 
+            nudge_x = 0.1)+
+  scale_x_reverse( lim=c(1300,0))
 ```
