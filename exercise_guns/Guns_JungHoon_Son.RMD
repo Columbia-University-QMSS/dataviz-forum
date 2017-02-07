@@ -199,7 +199,6 @@ population<-pop_density[2:52,c(12)]
 pop_death<-cbind(gun_deaths[2:52,],pop_density[2:52,c(1,12,23)],child_regulation=gun_ownership[2:52,c(7)])
 pop_death<-droplevels(pop_death)
 pop_death$X2010_DENSITY<-as.numeric(gsub(",","",levels(pop_death$X2010_DENSITY)[pop_death$X2010_DENSITY]))
-pop_death
 names(pop_death)[2]<-"death_rate"
 
 ```
