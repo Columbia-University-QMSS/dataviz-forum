@@ -21,7 +21,7 @@ To get you started with R Markdown and Github, I have detailed a few steps on ho
       date: "DATE"  
       tag: "guns"  
   9. Save the file with the following naming convention: `Guns_FIRSTNAME_LASTNAME.RMD` in the subfolder `exercise_guns\`.
-  10. A: Go GitHub Desktop. You will see one or more uncommitted changes. Commit the changes (with some very short summary description, e.g "First commit".) 
+  10. Go to GitHub Desktop. You will see one or more uncommitted changes. Commit the changes (with some very short summary description, e.g "First commit".) 
   11. Press the "Sync" button to upload the file to GitHub.
   12. You can continue working on the file, exploring data, adding commits, uploading them etc. Save and commit frequently. You might choose just to commit changes to the Rmd, and then only include the html at the end. Then you can see (and share, and store) the entire history of the process.
-  13. When you are done (but before class) open a pull for your branch targeting the forum master repo. This is how I know you are done as well.
+  13. When you are done (but before class) open a pull request for your branch targeting the forum master repo. This is how I know you are done as well.
