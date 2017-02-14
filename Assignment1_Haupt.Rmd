@@ -1,0 +1,165 @@
+---
+title: "Data Visualization - Assignment 1 - Haupt"
+author: "Michael Haupt"
+date: "2/11/2017"
+output: html_document
+---
+# Memo
+
+According to graph g1, it appears that countries in the “Low Income” category have the highest average percent of their populations unregistered at 30 percent. Low Mid Income countries have an average of 25 percent of their populations unregistered. Both Upper Middle Income and High Income countries have on average 15 percent on their populations unregistered. Based on this graph, it seems that countries with higher incomes are able to register larger percentages of their populations on average compared to countries with lower incomes. 
+
+As seen in graph g2, it looks like most countries require both a birth registration and a national ID to be mandatory with almost 150 countries having these policies. Around 25 countries that require a birth registration make having a national ID optional, and about 15 countries have a mandatory birth registration but no national ID. Additionally, it appears that a very small number of countries do not make birth registration mandatory. Out of these countries that do not have a mandatory birth registration, most of them do make a national ID required. Only a very small number of countries do not have a mandatory birth registration and also do not have a national ID. In general, the number of countries appear to increase with more strict birth registry and national ID policies
+
+Graph g3 is similar to graph g2 except that it also shows the ID policies of different countries by region. In general, the charts in graph g3 follow a similar pattern that was seen in g2: the majority of countries within each region make both birth registration and having a national ID mandatory. In the Middle East and South Asia regions, all the countries have a policy that makes registration at birth mandatory. All the countries in these regions also have national IDs (although for some of them having a national ID is only optional). Additionally, the Africa, Latin America, and Europe/Central Asia regions have very similar patterns as seen in the main graph in g2, where the vast majority of the countries require NID and birth registration. The East Asia/Pacific region differs from all the other regions since it’s the only instance where the number of countries that do not have any national ID is larger than the number of countries where a national ID exists but is optional.  
+
+Graph g4 is a point graph between the percent of the population below the poverty line and the percent of the population of unregistered citizens while also differentiating whether the country is “Free”, “Partly Free”, or “Not Free” as categorized by the World Bank. There is also a line drawn for each level of freedom to differentiate any possible difference between the three groupings. It does look like there is a positive relationship between the percent of people below the poverty line and the percent of unregistered citizens in general. Interestingly, the level of freedom for a country appears to influence the strength of this effect where countries that are rated as “Free” have lower percentages of unregistered citizens when the percent below poverty increases than countries that are not considered to be free. 
+
+Graphs g5 and g6 are histograms that show the number of countries that adopted national IDs and birth registries by year respectively. As seen in g5, the vast majority of countries started using a national ID after the year 2000. More specifically, over 40 countries had created a national ID around this time period. The graph in g6 has a different pattern. In g6, the distribution looks bimodal where a large amount of countries adopted a birth registry around 1850 (over 25 countries) and then another large push of countries adopted a birth registry around the 1950s (about 30 countries). From comparing the two graphs, it seems like national IDs are more of a recent trend since most countries started using them beginning in the 1950s with a large uptick starting in the 21st century. On the other hand, having birth registries appears to be a much older practice since a large number of countries started using them beginning in the 1850s, with another big uptick in the mid 20th century. Even when examining extreme cases, the earliest time period of a country using a national ID was around 1850 while there are instances of countries using birth registries before the 1700s (with even one case being recorded before the 1600s). 
+
+```{r fig.width = 9, fig.height = 9, warning = FALSE, message = FALSE}
+library(gdata)
+library(ggplot2)
+library(plyr)
+
+## Importing Excel File
+original <- read.xls("WB_ID4D_dataset.xlsx", sheet = "ID4D")
+
+## Setting up data, removing rows that aren't observations and resetting header
+d <- original[1:199, ]
+names(d) <- as.matrix(d[1, ])
+d <- d[-1, ]
+d[] <- lapply(d, function(x) type.convert(as.character(x)))
+
+## --------------------------------------
+
+## Renaming variables for g1
+names(d)[names(d) == "Unreg P%"] <- "UnregistPopPer"
+
+d$Level <- ordered(d$Level, levels = c("LIC", "LMIC", "UMIC", "HIC"))
+d$Level <- revalue(d$Level, c("LIC" = "Low Income", "LMIC" = "Low Mid Income", "UMIC" = "Upper Mid Income", "HIC" = "High Income"))
+
+## g1
+g1 <- ggplot(data = d, mapping = aes(x = Level, y = UnregistPopPer, fill = Level))
+g1 <- g1 + geom_bar(stat = "summary", fun.y = "mean")
+g1 <- g1 + theme_minimal()
+g1 <- g1 + labs(title = "Average Percent of Population Unregistered by Country Income Level", caption = "Source: World Bank Group", x = "Income Level", y = "Average % Unregistered")
+g1 <- g1 + scale_fill_brewer(palette = "Blues")
+g1
+
+
+
+## ---------------------------------------
+
+## Renaming variables for g2 / converting data in factors
+names(d)[names(d) == "CR M"] <- "BR_M"
+d$BR_M <- factor(d$BR_M)
+d$BR_M <- revalue(d$BR_M, c("1" = "BR Not Mandatory", "2" = "BR Mandatory"))
+d$NID_M <- factor(d$NID_M)
+d$NID_M <- revalue(d$NID_M, c("0" = "No NID", "1" = "NID Optional", "2" = "NID Mandatory"))
+
+## g2
+g2 <- ggplot(data = d, mapping = aes(x = BR_M, fill = NID_M))
+g2 <- g2 + geom_bar(position = "dodge")
+g2 <- g2 + labs(title = "Number of Countries with Birth Registry and National ID", caption = "Source: World Bank Group", fill = "NID Policy", x = "Birth Registration Policy", y = "Number of Countries")
+g2 <- g2 + scale_fill_brewer(palette = "Reds")
+g2 <- g2 + theme_minimal()
+g2
+
+## -----------------------------------
+## Renaming variables for g3
+
+d$Region <- ifelse(d$Region == "", "Other", d$Region)
+d$Region <- revalue(d$Region, c("2" = "Africa", "3" = "East Asian & Pacific", "4" = "Europe & Central Asia", "5" = "Latin America & Caribbean", "6" = "Middle East & North Africa", "7" = "South Asia"))
+
+d$Region <- as.factor(d$Region)
+
+## g3
+g3 <- ggplot(data = d, mapping = aes(x = BR_M, fill = NID_M))
+g3 <- g3 + geom_bar(position = "dodge")
+g3 <- g3 + labs(title = "Number of Countries with Birth Registry and National ID by Region", caption = "Source: World Bank Group", fill = "NID Policy", x = "Birth Registration Policy", y = "Number of Countries")
+g3 <- g3 + theme_minimal()
+g3 <- g3 + scale_fill_brewer(palette = "Reds")
+g3 <- g3 + facet_wrap(~ Region, labeller = label_both)
+g3
+
+## ------------------------------------
+## Renaming and Reordering variables for g4 / converting factor data back to numeric
+
+names(d)[names(d) == "PovL (%p)"] <- "PovPerBelow"
+d$PovPerBelow <- as.numeric(as.character(d$PovPerBelow))
+
+d$Status <- revalue(d$Status, c("F" = "Free", "NF" = "Not Free", "PF" = "Partly Free"))
+d$Status <- ordered(d$Status, levels = c("Free", "Partly Free", "Not Free"))
+
+## g4
+g4 <- ggplot(data = d, mapping = aes(x = PovPerBelow, y = UnregistPopPer, color = Status))
+g4 <- g4 + geom_point()
+g4 <- g4 + geom_smooth(model = lm, se = FALSE)
+g4 <- g4 + theme_minimal()
+g4 <- g4 + labs(title = "Percent of Pop Below Poverty and Percent Unregistered", caption = "Source: World Bank Group", colour = "Freedom in World", x = "Percent Below Poverty", y = "Percent of Pop Unregistered")
+g4
+
+## ------------------------------------
+## Renaming and Reordering variables for g5 and g6 / converting factor data back to numeric
+
+names(d)[names(d) == "NID Yr"] <- "NIDyr"
+names(d)[names(d) == "CR Yr"] <- "BRyr"
+
+d$NIDyr <- as.numeric(as.character(d$NIDyr))
+d$BRyr <- as.numeric(as.character(d$BRyr))
+
+## g5
+g5 <- ggplot(data = d, mapping = aes(x = NIDyr))
+g5 <- g5 + geom_histogram(fill = "Blue")
+g5 <- g5 + theme_minimal()
+g5 <- g5 + labs(title = "Amount of Countries Adopting National ID by Year", caption = "Source: World Bank Group", x = "Year National ID Used", y = "Number of Countries")
+g5
+
+## g6
+g6 <- ggplot(data = d, mapping = aes(x = BRyr))
+g6 <- g6 + geom_histogram(fill = "Red")
+g6 <- g6 + theme_minimal()
+g6 <- g6 + labs(title = "Amount of Countries Adopting Birth Registration by Year", caption = "Source: World Bank Group", x = "Year Birth Registry Adopted", y = "Number of Countries")
+g6
+
+```
+
+# Project Plan
+
+As seen in the comments of the R code, I imported the excel file into an object called “original.” I then subset the data into a new object called “d” so that only the rows that were observations were in the dataset. I also made sure to reset the headers for the variables.
+
+For g1, I wanted to show the relationship between the countries income level and the percent of the country’s citizens that are not registered. Since income in the dataset is ordinal and not continuous, I chose to use a bar graph instead of a scatter plot. 
+
+Originally I planned for the g2 graph to be a scatter plot, using the x variable to be Birth Registration Policy and the y variable to be NID Policy (labeled as gT). However, because I was using the “geom_jitter” function it made it look like there is more variation in the data then there actually is. Since there are only 2 different categories for Birth Registration and 3 different categories for NID policy, there are only 6 possible combinations that each observation could be. However, since the scatterplot tries to spread out each dot, it makes it look like the variables are continuous with some clustering occurring in certain areas. To make the categories clearer, I changed g2 into a bar graph. 
+
+For g3, I wanted to further explore the relationship between BR and NID policy and how policies might differ based on the country’s region. For this graph, I added a “facet_wrap” while also renaming the factor variables for Region using the “revalue” function. 
+
+The original graph for g4 (labeled as gT2) did not explore the “Freedom Status” variable. I decided to add the new variable as a “fill” in the graph because I wanted to see if the level of freedom of a country might impact the percent of the population that is unregistered. I was not expecting the “geom_smooth” function to add lines for all three Freedom statuses, which was a nice surprise. I ended up removing the standard error for the lines because the plot was looking too crowded. 
+
+For g5 and g6, I wanted to see if there were any differences in the adoption periods for birth registration and national ID. I made them both histograms to make it easier to compare between them. I also made NID blue and BR red to make it easier to differentiate between the two graphs. 
+
+
+
+```{r fig.width = 9, fig.height = 9, warning = FALSE, message = FALSE}
+
+## Original form of g2 
+gT <- ggplot(data = d, mapping = aes(x = BR_M, y = NID_M))
+gT <- gT + geom_jitter()
+gT <- gT + labs(title = "Number of Countries with Birth Registry and National ID", caption = "Source: World Bank Group", x = "Birth Registration Policy", y = "NID Policy")
+gT <- gT + scale_fill_discrete(name = "NID Policy")
+gT <- gT + theme_minimal()
+gT
+
+## Original form of g4
+gT2 <- ggplot(data = d, mapping = aes(x = PovPerBelow, y = UnregistPopPer))
+gT2 <- gT2 + geom_point()
+gT2 <- gT2 + geom_smooth(model = lm)
+gT2 <- gT2 + theme_minimal()
+gT2 <- gT2 + labs(title = "Percent of Pop Below Poverty and Percent Unregistered", caption = "Source: World Bank Group", x = "Percent Below Poverty", y = "Percent of Pop Unregistered")
+gT2
+```
+
+
+
+
+
