@@ -1,0 +1,113 @@
+---
+title: "Mapping in R"
+output: github_document
+---
+
+```{r}
+library(WDI)
+library(dplyr)
+library(ggmap)
+library(maptools)
+library(maps)
+```
+```{r}
+WDIsearch('health expenditure')
+```
+
+```{r}
+df <- WDI(indicator = "SH.XPD.TOTL.ZS" ,
+         start = 2014, end = 2014, extra = F)
+df <- df %>% filter(!is.na(SH.XPD.TOTL.ZS))
+df <- dplyr::rename(df, code = iso2c, expgdp = SH.XPD.TOTL.ZS)
+df <- df %>% mutate(expgdp = as.numeric(expgdp))
+```
+
+World map of health expenditures as a share of GDP
+```{r}
+map(database = "world", fill = TRUE, col=expgdp, bg="white", ylim=c(-60, 90), mar=c(0,0,0,0))
+world <- map_data("world")
+ggplot() + geom_polygon( data = world, aes(x=long,y=lat,group=group), 
+                         color = "grey", fill = NA)
+```
+
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(stringr)
+world <- as_data_frame(world)
+world <- dplyr::rename(world, country=region)
+world$subregion = NULL
+world$country <- str_to_title(world$country)
+world.merged = left_join(world, df)
+```
+
+```{r}
+# We can use ggplot2 to make maps as well
+library(ggplot2)  
+(gdpmap <- ggplot(world.merged, 
+                        aes(x = long, y = lat, group=group)) + 
+  geom_polygon(aes(fill = expgdp), color="white") 
+  + theme_minimal())
+```
+
+Some countries didn't work--I'm assuming because they are called differently in the two data sets. I'd need to reconcile that for a graded assignment, either using a code or changing the names manually.
+
+```{r}
+library(countrycode)
+df <- mutate(df, region = countrycode(df$code, "iso2c", "region"))
+df <- mutate(df, country = countrycode(df$code, "iso2c", "country.name"))
+world.merged = left_join(world, df)
+```
+```{r}
+(gdpmap <- ggplot(world.merged, 
+                        aes(x = long, y = lat, group=group)) + 
+  geom_polygon(aes(fill = expgdp), color="white") +
+  facet_wrap(~region) + theme_minimal())
+```
+
+```{r}
+library(readr)
+setwd("/Users/rebeccaportman/Desktop/Spring 2017/Data Viz/dataviz-forum/exercise_maps/exercise")
+fortune500 <- read_csv("fortune500.csv")
+```
+aggregate by state
+```{r}
+by_state <- group_by(fortune500, state) %>% 
+  summarise(n = n())
+by_state
+```
+```{r}
+us.states <- map_data("state")
+us.states <- as_data_frame(us.states)
+us.states <- dplyr::rename(us.states, state=region)
+us.states$subregion = NULL
+us.states$state <- str_to_title(us.states$state)
+# Add State Abbreviations and Centers
+statenames <- as_data_frame(cbind(state=state.name, 
+                state.abb = state.abb, state.center.x = state.center$x, 
+                state.center.y = state.center$y))
+statenames <- statenames %>% mutate_each_(funs(as.numeric), 
+                vars=c("state.center.x","state.center.y"))
+us.states <- left_join(us.states,statenames)
+f500.merged = left_join(by_state, us.states)
+f500.merged <- mutate(f500.merged, as.numeric(n))
+f500.merged
+```
+```{r}
+(f500map <- ggplot(f500.merged, 
+                        aes(x = long, y = lat, group=group)) +  geom_polygon(aes(fill = n), color="white"))
+```
+
+Again, missing some values so I would need to go back and fix that
+
+```{r}
+library(readxl)
+setwd("/Users/rebeccaportman/Desktop/Spring 2017/Data Viz/dataviz-forum/exercise_maps/exercise")
+corpinctax<- read_excel("State_Corporate_Income_Tax_Rates_2015.xlsx", sheet = 2, col_names = TRUE)
+corpinctax <- mutate(corpinctax, topcorpinctax = as.numeric(topcorpinctax))
+corptax.merged = left_join(corpinctax, us.states)
+(corptaxmap <- ggplot(corptax.merged, 
+                        aes(x = long, y = lat, group=group)) +  geom_polygon(aes(fill = topcorpinctax), color="white"))
+```
+
