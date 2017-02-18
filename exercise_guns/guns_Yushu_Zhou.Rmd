@@ -1,0 +1,117 @@
+---
+title: "exexcise_guns"
+author: "Yushu Zhou"
+date: "February 2, 2017"
+tag: "guns"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+## Dataset 1: Gunsales - NYTimes
+
+```{r}
+library(gunsales)
+gun_sales <- analysis()
+```
+
+## Dataset 2:
+
+```{r}
+library(XML)
+library(dplyr)
+gun_ownership_url = 'http://www.washingtonpost.com/wp-srv/health/interactives/guns/ownership.html'
+gun_ownership = readHTMLTable(gun_ownership_url, header = TRUE, which = 1)
+gun_ownership = gun_ownership[-1, ]
+
+parse_num = function (x) as.numeric(sub(',', '', x))
+gun_ownership = select(gun_ownership, State = 1, Total = 2, Yes = 3,
+                       `Yes %` = 4, No = 5, `No %` = 6) %>%
+                        mutate_each(funs(parse_num), -State)
+
+gun_ownership = gun_ownership %>%
+    mutate(`Child access prevention` = grepl('\\*$', State),
+           State  = sub('\\*$', '', State))
+
+# Fix D.C. name
+gun_ownership[gun_ownership$State == 'The District', 'State'] = 'District of Columbia' 
+```
+
+## Datasource 3: Deaths due to firearms by state - Kaiser Family Foundation
+
+```{r}
+gun_deaths = read.csv(file.choose(), skip = 3) %>%
+    select(State = 1, `Deaths per 100000` = 2)
+```
+
+## Dataset 4: Gun-related deaths at the invidual level (2012-2014)
+
+```{r, warning=FALSE, comment=FALSE}
+library(readr)
+gun_inddeaths <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/guns-data/master/full_data.csv")
+gun_inddeaths <- gun_inddeaths[,2:dim(gun_inddeaths)[2]]
+```
+
+## Possible Questions to explore with these data (feel free to explore what you think is interesting)
+
+- Does gun ownership correlate with firearm deaths in the U.S.? Does the pattern hold only in the aggregate or also by state? 
+
+```{r}
+# Create a new data frame consisting of gun ownership and firearm deaths by state and in the aggregate
+names(gun_deaths) <- c("State", "Deaths_per_100000")
+df <- data.frame(cbind(gun_ownership[1:52, ]$State, gun_deaths[1:52, ]$Deaths_per_100000, gun_ownership[1:52, ]$Yes))
+names(df) <-  c("State", "Deaths_per_100000", "Gun_ownership")
+levels(df$State) <- c(levels(df$State), "U.S.")
+df$State[df$State == "All Participants"] <- "U.S."
+
+# Change factor into other data structures to order
+df$Deaths_per_100000 <- as.numeric(df$Deaths_per_100000)
+df$Gun_ownership <- as.numeric(df$Gun_ownership)
+df$State <- as.character(df$State)
+
+# Draw a picture showing the relationship between gun ownership and firearm deaths
+ggplot(df, aes(x = Gun_ownership, y = Deaths_per_100000)) + geom_point(color = "pink") + geom_text(aes(label = State))
+```
+
+    From above pieture, we can find there is no apparent relationship between gun ownership and firearm deaths.
+
+- What is the pattern of gunsales over time?  
+
+```{r}
+# Calculate total gun sales in a year and delete data from 2016 because there is only 2-month data.
+gun_sales_year <- gun_sales[1:192, ]%>%
+  group_by(year) %>%
+  summarise(sales_year = sum(guns_total), na.rm = TRUE)
+ggplot(gun_sales_year, aes(x = year, y = sales_year)) + geom_point(color = "blue", size = 3) + geom_smooth(color = "black", lwd = 1.5, se = FALSE)
+```
+
+    From above picture, we can find that total gun sales fluctuated around 8.0e+06 from 2000 to 2006 and after 2006, gun sales increased year by year until 2015. The increasing rate began to get larger and larger since 2003 and after 2012, it began to decrease.
+
+- What are the individual level patterns of gun deaths? Are gun regulations (e.g. child access prevention laws) associated with lower gun death rates? How about suicides (especially by non-adults)?
+```{r}
+# total deaths by date
+gun_inddeaths$date <- as.Date(paste(gun_inddeaths$month, "01", gun_inddeaths$year, sep = "-"), format = "%m-%d-%Y")
+total <- count(gun_inddeaths, date)
+ggplot(total, aes(x = date, y = n)) + geom_point() + geom_smooth(lwd = 1, se = FALSE)
+
+# total deaths by date and intent
+total_inddeaths <- count(gun_inddeaths, date, intent)
+total_inddeaths <- na.omit(total_inddeaths)
+ggplot(total_inddeaths, aes(x = date, y = n)) + geom_point(aes(color = intent)) + geom_smooth(lwd = 1, se = FALSE, aes(color = intent))
+```
+
+    From above pictures, we can see individual level of gun deaths fluctuated around 2800/month. After 2014, it began to rise slightly. If we divided it into 4 types due to the reason for death, we can find it still fluctuated around each mean.
+    As of 2013, 27 states in the United States, had enacted a CAP law, which may result in the decrease of total deaths from 2900/month to 2700/month in 2013, but total deaths began to increase in 2014 again. Therefore, I do not think this gun regulation correlates stronly with total deaths.
+    
+```{r}
+# total deaths of non-adults by date
+inddeaths_teen <- gun_inddeaths[gun_inddeaths$age <= 18, ]
+total_teen <- count(inddeaths_teen, date)
+total_teen <- na.omit(total_teen)
+ggplot(total_teen, aes(x = date, y = n)) + geom_point() + geom_smooth(lwd = 1, se = FALSE)
+```
+
+    I drew total deaths of non-adults for each month from 2012.01 to 2014.12 as above. We can find total deaths fluctuated around 150/month during 2013 and began to increase in 2014, so CAP seems like not to make total deaths of non-adults decrease at all.

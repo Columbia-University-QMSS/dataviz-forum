@@ -1,0 +1,117 @@
+---
+title: "DV_Exercise"
+author: "Junxuan Mao"
+date: "2/5/2017"
+tag:"guns"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Datasource 1: Gunsales - NYTimes
+```{r}
+## install.packages("gunsales")
+library(gunsales)
+gun_sales <- analysis()
+str(gun_sales[, 1:12])
+```
+
+```{r}
+plot_gunsales(gun_sales)    
+ggplot_gunsales(gun_sales)
+```
+
+### Datasource2: Gun Ownership survey data - Washington Post
+```{r}
+library(XML)
+library(dplyr)
+gun_ownership_url = 'http://www.washingtonpost.com/wp-srv/health/interactives/guns/ownership.html'
+gun_ownership = readHTMLTable(gun_ownership_url, header = TRUE, which = 1)
+gun_ownership = gun_ownership[-1, ]
+
+parse_num = function (x) as.numeric(sub(',', '', x))
+gun_ownership = select(gun_ownership, State = 1, Total = 2, Yes = 3,
+                       `Yes %` = 4, No = 5, `No %` = 6) %>%
+                        mutate_each(funs(parse_num), -State)
+head(gun_ownership)
+
+gun_ownership = gun_ownership %>%
+    mutate(`Child access prevention` = grepl('\\*$', State),
+           State  = sub('\\*$', '', State))
+
+# Fix D.C. name
+gun_ownership[gun_ownership$State == 'The District', 'State'] = 'District of Columbia' 
+```
+
+### Datasource 3: Deaths due to firearms by state - Kaiser Family Foundation
+```{r}
+gun_deaths = read.csv("/Users/elka/Desktop/Data Visualization/KFF_deaths_firearms.csv", skip = 5) %>%
+    select(State = 1, `Deaths per 100000` = 2) %>%
+    slice(1:52)
+
+head(gun_deaths)
+```
+
+### Dataset 4: Gun-related deaths at the invidual level (2012-2014)
+```{r}
+library(readr)
+gun_inddeaths <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/guns-data/master/full_data.csv")
+gun_inddeaths <- gun_inddeaths[,2:dim(gun_inddeaths)[2]]
+
+head(gun_inddeaths)
+```
+
+
+### Questions
+1. Does gun ownership correlate with firearm deaths in the U.S.? Does the pattern hold only in the aggregate or also by state?
+```{r}
+## fix name of "all participant"
+gun_ownership[gun_ownership$State == 'All Participants', 'State'] = 'United States'
+
+## joint two data frame by common column "State"
+gun_death_onwer <- left_join(gun_deaths, gun_ownership, by = "State")
+
+library(ggplot2)
+ggplot(gun_death_onwer, aes(`Yes %`, `Deaths per 100000`)) + geom_point()
+```
+
+
+2. What is the pattern of gunsales over time?
+```{r}
+library(zoo)
+## Combine "year" and "month" into one "Data" column for plotting
+gun_sales <- gun_sales %>% mutate(Date = as.yearmon(paste(year, month), "%Y %m"))
+
+ggplot(gun_sales, aes(Date, guns_total)) + geom_point()
+ggplot(gun_sales, aes(Date, guns_total_per_1000)) + geom_point()
+ggplot(gun_sales, aes(Date, guns_total_per_1000_scaled)) + geom_point()
+```
+
+
+3. What are the individual level patterns of gun deaths? Are gun regulations (e.g. child access prevention laws) associated with lower gun death rates? How about suicides (especially by non-adults)?
+
+```{r}
+gun_inddeaths <- gun_inddeaths %>% mutate(Date = as.yearmon(paste(year, month), "%Y %m"))
+
+ggplot(gun_inddeaths, aes(year))+ geom_bar()
+ggplot(gun_inddeaths, aes(month))+ geom_bar()
+ggplot(gun_inddeaths, aes(Date))+ geom_bar()
+ggplot(gun_inddeaths, aes(as.factor(intent)))+ geom_bar()
+ggplot(gun_inddeaths, aes(as.factor(sex)))+ geom_bar()
+ggplot(gun_inddeaths, aes(age))+ geom_bar()
+ggplot(gun_inddeaths, aes(as.factor(race)))+ geom_bar()
+ggplot(gun_inddeaths, aes(place))+ geom_bar()
+ggplot(gun_inddeaths, aes(education))+ geom_bar()
+ggplot(gun_inddeaths, aes(intent, age))+ geom_boxplot()
+```
+
+
+
+```{r}
+## Gun regulations associate wiith lower gun death rates
+ggplot(gun_death_onwer, aes(as.factor(`Child access prevention`), `Deaths per 100000`)) + geom_boxplot()
+```
+
+
