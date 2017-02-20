@@ -9,6 +9,9 @@ library(dplyr)
 library(ggmap)
 library(maptools)
 library(maps)
+library(tidyverse)
+library(stringr)
+library(ggplot2)  
 ```
 ```{r}
 WDIsearch('health expenditure')
@@ -32,9 +35,6 @@ ggplot() + geom_polygon( data = world, aes(x=long,y=lat,group=group),
 
 
 ```{r}
-library(dplyr)
-library(tidyverse)
-library(stringr)
 world <- as_data_frame(world)
 world <- dplyr::rename(world, country=region)
 world$subregion = NULL
@@ -43,8 +43,6 @@ world.merged = left_join(world, df)
 ```
 
 ```{r}
-# We can use ggplot2 to make maps as well
-library(ggplot2)  
 (gdpmap <- ggplot(world.merged, 
                         aes(x = long, y = lat, group=group)) + 
   geom_polygon(aes(fill = expgdp), color="white") 
@@ -99,7 +97,7 @@ f500.merged
                         aes(x = long, y = lat, group=group)) +  geom_polygon(aes(fill = n), color="white"))
 ```
 
-Again, missing some values so I would need to go back and fix that
+Again, missing some values so I would need to go back and fix that--I think the states got dropped because there were no f500 companies there.
 
 ```{r}
 library(readxl)
