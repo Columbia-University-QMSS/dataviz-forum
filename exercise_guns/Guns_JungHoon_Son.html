@@ -363,7 +363,112 @@ population&lt;-pop_density[2:52,c(12)]
 pop_death&lt;-cbind(gun_deaths[2:52,],pop_density[2:52,c(1,12,23)],child_regulation=gun_ownership[2:52,c(7)])
 pop_death&lt;-droplevels(pop_death)
 pop_death$X2010_DENSITY&lt;-as.numeric(gsub(&quot;,&quot;,&quot;&quot;,levels(pop_death$X2010_DENSITY)[pop_death$X2010_DENSITY]))
-names(pop_death)[2]&lt;-&quot;death_rate&quot;</code></pre>
+pop_death</code></pre>
+<pre><code>##                   State Deaths per 100000      STATE_OR_REGION
+## 2               Alabama              16.9              Alabama
+## 3                Alaska              19.2               Alaska
+## 4               Arizona              13.5              Arizona
+## 5              Arkansas              16.6             Arkansas
+## 6            California               7.4           California
+## 7              Colorado              12.2             Colorado
+## 8           Connecticut               5.0          Connecticut
+## 9              Delaware              11.1             Delaware
+## 10 District of Columbia              11.7 District of Columbia
+## 11              Florida              11.5              Florida
+## 12              Georgia              13.7              Georgia
+## 13               Hawaii               2.6               Hawaii
+## 14                Idaho              13.2                Idaho
+## 15             Illinois               9.0             Illinois
+## 16              Indiana              12.4              Indiana
+## 17                 Iowa               7.5                 Iowa
+## 18               Kansas              11.3               Kansas
+## 19             Kentucky              13.9             Kentucky
+## 20            Louisiana              19.0            Louisiana
+## 21                Maine               9.4                Maine
+## 22             Maryland               9.0             Maryland
+## 23        Massachusetts               3.2        Massachusetts
+## 24             Michigan              11.1             Michigan
+## 25            Minnesota               6.6            Minnesota
+## 26          Mississippi              18.3          Mississippi
+## 27             Missouri              15.3             Missouri
+## 28              Montana              16.1              Montana
+## 29             Nebraska               9.5             Nebraska
+## 30               Nevada              14.8               Nevada
+## 31        New Hampshire               8.7        New Hampshire
+## 32           New Jersey               5.3           New Jersey
+## 33           New Mexico              16.0           New Mexico
+## 34             New York               4.2             New York
+## 35       North Carolina              11.8       North Carolina
+## 36         North Dakota              12.3         North Dakota
+## 37                 Ohio              10.3                 Ohio
+## 38             Oklahoma              15.7             Oklahoma
+## 39               Oregon              11.7               Oregon
+## 40         Pennsylvania              10.5         Pennsylvania
+## 41         Rhode Island               3.0         Rhode Island
+## 42       South Carolina              15.5       South Carolina
+## 43         South Dakota              10.3         South Dakota
+## 44            Tennessee              15.2            Tennessee
+## 45                Texas              10.7                Texas
+## 46                 Utah              12.3                 Utah
+## 47              Vermont              10.3              Vermont
+## 48             Virginia              10.3             Virginia
+## 49           Washington               9.7           Washington
+## 50        West Virginia              14.6        West Virginia
+## 51            Wisconsin               8.2            Wisconsin
+## 52              Wyoming              16.2              Wyoming
+##    X2010_POPULATION X2010_DENSITY child_regulation
+## 2           4779736          94.4            FALSE
+## 3            710231           1.2            FALSE
+## 4           6392017          56.3            FALSE
+## 5           2915918          56.0            FALSE
+## 6          37253956         239.1             TRUE
+## 7           5029196          48.5            FALSE
+## 8           3574097         738.1             TRUE
+## 9            897934         460.8             TRUE
+## 10           601723        9856.5            FALSE
+## 11         18801310         350.6             TRUE
+## 12          9687653         168.4            FALSE
+## 13          1360301         211.8             TRUE
+## 14          1567582          19.0            FALSE
+## 15         12830632         231.1             TRUE
+## 16          6483802         181.0            FALSE
+## 17          3046355          54.5             TRUE
+## 18          2853118          34.9            FALSE
+## 19          4339367         109.9            FALSE
+## 20          4533372         104.9            FALSE
+## 21          1328361          43.1            FALSE
+## 22          5773552         594.8             TRUE
+## 23          6547629         839.4             TRUE
+## 24          9883640         174.8            FALSE
+## 25          5303925          66.6             TRUE
+## 26          2967297          63.2            FALSE
+## 27          5988927          87.1            FALSE
+## 28           989415           6.8            FALSE
+## 29          1826341          23.8            FALSE
+## 30          2700551          24.6             TRUE
+## 31          1316470         147.0             TRUE
+## 32          8791894        1195.5             TRUE
+## 33          2059179          17.0            FALSE
+## 34         19378102         411.2            FALSE
+## 35          9535483         196.1             TRUE
+## 36           672591           9.7            FALSE
+## 37         11536504         282.3            FALSE
+## 38          3751351          54.7            FALSE
+## 39          3831074          39.9            FALSE
+## 40         12702379         283.9            FALSE
+## 41          1052567        1018.1             TRUE
+## 42          4625364         153.9            FALSE
+## 43           814180          10.7            FALSE
+## 44          6346105         153.9            FALSE
+## 45         25145561          96.3             TRUE
+## 46          2763885          33.6            FALSE
+## 47           625741          67.9            FALSE
+## 48          8001024         202.6             TRUE
+## 49          6724540         101.2            FALSE
+## 50          1852994          77.1            FALSE
+## 51          5686986         105.0             TRUE
+## 52           563626           5.8            FALSE</code></pre>
+<pre class="r"><code>names(pop_death)[2]&lt;-&quot;death_rate&quot;</code></pre>
 </div>
 <div id="gun-related-deaths-vs.population-density" class="section level3">
 <h3>Gun-related deaths vs. Population density</h3>
