@@ -1,18 +1,17 @@
 ---
-title: "Mapping in R"
-output: github_document
+title: "Mapping Exercise"
+author: "Becca Portman"
+date: "2/21/2017"
+output: html_document
 ---
-
 ```{r}
 library(WDI)
 library(dplyr)
 library(ggmap)
 library(maptools)
 library(maps)
-library(tidyverse)
-library(stringr)
-library(ggplot2)  
 ```
+
 ```{r}
 WDIsearch('health expenditure')
 ```
@@ -27,21 +26,25 @@ df <- df %>% mutate(expgdp = as.numeric(expgdp))
 
 World map of health expenditures as a share of GDP
 ```{r}
-map(database = "world", fill = TRUE, col=expgdp, bg="white", ylim=c(-60, 90), mar=c(0,0,0,0))
+us.states <- map_data("state")
 world <- map_data("world")
 ggplot() + geom_polygon( data = world, aes(x=long,y=lat,group=group), 
                          color = "grey", fill = NA)
+
 ```
-
-
 ```{r}
+library(dplyr)
+library(tidyverse)
+library(stringr)
+library(countrycode)
 world <- as_data_frame(world)
 world <- dplyr::rename(world, country=region)
 world$subregion = NULL
 world$country <- str_to_title(world$country)
-world.merged = left_join(world, df)
-```
+world <- mutate(world, code = countrycode(world$country, "country.name", "iso2c"))
+world.merged <-  left_join(world, df, by = "code")
 
+```
 ```{r}
 (gdpmap <- ggplot(world.merged, 
                         aes(x = long, y = lat, group=group)) + 
@@ -49,34 +52,29 @@ world.merged = left_join(world, df)
   + theme_minimal())
 ```
 
-Some countries didn't work--I'm assuming because they are called differently in the two data sets. I'd need to reconcile that for a graded assignment, either using a code or changing the names manually.
-
 ```{r}
 library(countrycode)
-df <- mutate(df, region = countrycode(df$code, "iso2c", "region"))
-df <- mutate(df, country = countrycode(df$code, "iso2c", "country.name"))
-world.merged = left_join(world, df)
+world.merged <- mutate(world.merged, region = countrycode(world.merged$code, "iso2c", "region"))
 ```
 ```{r}
 (gdpmap <- ggplot(world.merged, 
                         aes(x = long, y = lat, group=group)) + 
   geom_polygon(aes(fill = expgdp), color="white") +
   facet_wrap(~region) + theme_minimal())
-```
 
+```
 ```{r}
 library(readr)
 setwd("/Users/rebeccaportman/Desktop/Spring 2017/Data Viz/dataviz-forum/exercise_maps/exercise")
 fortune500 <- read_csv("fortune500.csv")
 ```
-aggregate by state
 ```{r}
 by_state <- group_by(fortune500, state) %>% 
   summarise(n = n())
 by_state
 ```
 ```{r}
-us.states <- map_data("state")
+library(stringr)
 us.states <- as_data_frame(us.states)
 us.states <- dplyr::rename(us.states, state=region)
 us.states$subregion = NULL
@@ -88,24 +86,52 @@ statenames <- as_data_frame(cbind(state=state.name,
 statenames <- statenames %>% mutate_each_(funs(as.numeric), 
                 vars=c("state.center.x","state.center.y"))
 us.states <- left_join(us.states,statenames)
-f500.merged = left_join(by_state, us.states)
-f500.merged <- mutate(f500.merged, as.numeric(n))
-f500.merged
+f500.merged = left_join(us.states, by_state)
+f500.merged <- mutate(f500.merged, n = as.numeric(n))
+f500.merged["n"][is.na(f500.merged["n"])] <- 0
+
 ```
 ```{r}
 (f500map <- ggplot(f500.merged, 
                         aes(x = long, y = lat, group=group)) +  geom_polygon(aes(fill = n), color="white"))
 ```
 
-Again, missing some values so I would need to go back and fix that--I think the states got dropped because there were no f500 companies there.
-
 ```{r}
 library(readxl)
 setwd("/Users/rebeccaportman/Desktop/Spring 2017/Data Viz/dataviz-forum/exercise_maps/exercise")
 corpinctax<- read_excel("State_Corporate_Income_Tax_Rates_2015.xlsx", sheet = 2, col_names = TRUE)
 corpinctax <- mutate(corpinctax, topcorpinctax = as.numeric(topcorpinctax))
-corptax.merged = left_join(corpinctax, us.states)
+corpinctax$state <- str_trim(corpinctax$state)
+corpinctax$state <- str_to_title(corpinctax$state)
+corpinctax <- merge(corpinctax, statenames, by = "state")
+corptax.merged <- left_join(us.states, corpinctax)
 (corptaxmap <- ggplot(corptax.merged, 
                         aes(x = long, y = lat, group=group)) +  geom_polygon(aes(fill = topcorpinctax), color="white"))
+```
+
+```{r}
+f500.merged = left_join(f500.merged, corptax.merged)
+ggplot(f500.merged) + geom_point(aes(x=topcorpinctax, y = n)) + theme_minimal() + geom_smooth(aes(x=topcorpinctax, y = n), formula = y ~ x, color = "red")
+```
+
+```{r}
+library(readr)
+setwd("/Users/rebeccaportman/Desktop/Spring 2017/Data Viz/dataviz-forum/exercise_maps/exercise")
+population <- read_csv("population.csv")
+f500.merged <- left_join(f500.merged, population)
+f500.merged$hqspercapita <- (f500.merged$n/f500.merged$julypop)
+ggplot(f500.merged) + geom_point(aes(x=topcorpinctax, y = hqspercapita)) + theme_minimal() + geom_smooth(aes(x=topcorpinctax, y = hqspercapita), formula = y ~ x, color = "red")
+```
+
+```{r}
+library(ggmap)
+geocode("702 S.W. Eighth St. Bentonville Arkansas 72716", output = "latlon" , source = "google")
+fortune500$address <- paste(fortune500$streetadd, fortune500$place, fortune500$state, fortune500$zip)
+geocodes <- geocode(fortune500$address, output = "latlon" , source = "google")
+```
+```{r}
+fortune500$lon <- geocodes$lon
+fortune500$lat <- geocodes$lat
+(corptaxmap <- ggplot() +  geom_polygon(data = corptax.merged, aes(x = long, y = lat, group = group, fill = topcorpinctax), color="white") + geom_point(aes(x= lon, y = lat), data = fortune500, size=2, alpha=0.3, color="red")) 
 ```
 
