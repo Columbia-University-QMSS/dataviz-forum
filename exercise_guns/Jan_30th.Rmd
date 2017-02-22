@@ -1,0 +1,60 @@
+---
+title: "Guns"
+author: "Hongbo Wang"
+date: "2/2/2017"
+output: html_document
+tag:"guns"
+---
+
+```{r}
+rm(list = ls())
+library(gunsales)
+gun_sales <- analysis()
+str(gun_sales[,1:12])
+
+```
+
+
+### Datasource 1: Gunsales- NYTimes
+```{r}
+plot_gunsales(gun_sales)
+ggplot_gunsales(gun_sales)
+```
+
+### Datasource 2: Gun ownership survey data - Washington Post
+```{r}
+library(XML)
+library(dplyr)
+gun_ownership_url = 'http://www.washingtonpost.com/wp-srv/health/interactives/guns/ownership.html'
+gun_ownership = readHTMLTable(gun_ownership_url, header = TRUE, which = 1)
+gun_ownership = gun_ownership[-1, ]
+
+parse_num = function (x) as.numeric(sub(',', '', x))
+gun_ownership = select(gun_ownership, State = 1, Total = 2, Yes = 3,
+                       `Yes %` = 4, No = 5, `No %` = 6) %>%
+                        mutate_each(funs(parse_num), -State)
+head(gun_ownership)
+```
+
+### Dataset 3: Deaths due to firearms by state - Kaiser Family Foundation
+```{r}
+# Website appears to block scraping, but allows downloading data.
+#gun_deaths_url = 'http://kff.org/other/state-indicator/firearms-death-rate-per-100000/'
+#gun_deaths = readHTMLTable(gun_deaths_url)
+# Instead, we use the manually downloaded CSV output.
+gun_deaths = read.csv("/Users/Evan-WANG/Desktop/dataviz-forum/exercise_guns/exercise/KFF_deaths_firearms.csv", skip = 3) %>%
+    select(State = 1, `Deaths per 100000` = 2)
+
+head(gun_deaths)
+```
+
+### Dataset 4: Gun-related deaths at the invidual level (2012-2014)
+```{r}
+library(readr)
+gun_inddeaths <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/guns-data/master/full_data.csv")
+gun_inddeaths <- gun_inddeaths[,2:dim(gun_inddeaths)[2]]
+
+head(gun_inddeaths)
+```
+
+
