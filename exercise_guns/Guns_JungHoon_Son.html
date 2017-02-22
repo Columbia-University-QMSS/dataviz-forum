@@ -132,7 +132,6 @@ $(document).ready(function () {
 <li>Display structure of <strong>gun_sales</strong>.</li>
 </ol>
 <pre class="r"><code>library(gunsales)</code></pre>
-<pre><code>## Warning: package 'gunsales' was built under R version 3.3.2</code></pre>
 <pre><code>## Package 'gunsales' -- use 'vignette(&quot;gunsales&quot;)' to see a short summary.
 ## See the repository at https://github.com/NYTimes/gunsales/ for details.</code></pre>
 <pre class="r"><code>gun_sales &lt;- analysis()</code></pre>
@@ -159,10 +158,8 @@ $(document).ready(function () {
 <div id="datasource-2-gun-ownership-survey-data---washington-post" class="section level2">
 <h2>Datasource 2: Gun ownership survey data - Washington Post</h2>
 <hr />
-<pre class="r"><code>library(XML)</code></pre>
-<pre><code>## Warning: package 'XML' was built under R version 3.3.2</code></pre>
-<pre class="r"><code>library(dplyr)</code></pre>
-<pre><code>## Warning: package 'dplyr' was built under R version 3.3.2</code></pre>
+<pre class="r"><code>library(XML)
+library(dplyr)</code></pre>
 <pre><code>## 
 ## Attaching package: 'dplyr'</code></pre>
 <pre><code>## The following objects are masked from 'package:stats':
@@ -222,9 +219,8 @@ head(gun_deaths)</code></pre>
 <div id="dataset-4-gun-related-deaths-at-the-individual-level-2012-2014" class="section level2">
 <h2>Dataset 4: Gun-related deaths at the individual level (2012-2014)</h2>
 <hr />
-<pre class="r"><code>library(readr)</code></pre>
-<pre><code>## Warning: package 'readr' was built under R version 3.3.2</code></pre>
-<pre class="r"><code>gun_inddeaths &lt;- read.csv(&quot;https://raw.githubusercontent.com/fivethirtyeight/guns-data/master/full_data.csv&quot;)
+<pre class="r"><code>library(readr)
+gun_inddeaths &lt;- read.csv(&quot;https://raw.githubusercontent.com/fivethirtyeight/guns-data/master/full_data.csv&quot;)
 gun_inddeaths &lt;- gun_inddeaths[,2:dim(gun_inddeaths)[2]]
 head(gun_inddeaths)</code></pre>
 <pre><code>##   year month  intent police sex age                           race
@@ -252,9 +248,8 @@ head(gun_inddeaths)</code></pre>
 <p>After looking at data, rows 2 to 52 show all 50 states+DC for both <strong>gun_deaths</strong> and <strong>gun_ownership</strong> tables, in alphabetical order. Created a single data table <strong>deaths_ownership</strong> for easier plotting/management.</p>
 <pre class="r"><code>deaths_ownership&lt;-cbind(gun_deaths[2:52,],ownership= gun_ownership[2:52,]$'Yes %')
 colnames(deaths_ownership)[2]&lt;-&quot;death_rate&quot;
-library(ggplot2)</code></pre>
-<pre><code>## Warning: package 'ggplot2' was built under R version 3.3.2</code></pre>
-<pre class="r"><code>ggplot(deaths_ownership,aes(ownership,death_rate,label=State))+
+library(ggplot2)
+ggplot(deaths_ownership,aes(ownership,death_rate,label=State))+
   geom_point(data=deaths_ownership) +
   geom_text(size=3,
             vjust = 0,
@@ -269,7 +264,6 @@ library(ggplot2)</code></pre>
 <h2>What is the pattern of gunsales over time?</h2>
 <hr />
 <pre class="r"><code>library(scales)</code></pre>
-<pre><code>## Warning: package 'scales' was built under R version 3.3.2</code></pre>
 <pre><code>## 
 ## Attaching package: 'scales'</code></pre>
 <pre><code>## The following objects are masked from 'package:readr':
