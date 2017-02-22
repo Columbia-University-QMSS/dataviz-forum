@@ -1,0 +1,101 @@
+---
+title: "Data Visualization Exercise"
+author: "Shilpa Sure"
+date: "2/4/2017"
+output: html_document
+---
+
+## Datasource 1: Gunsales - NYTimes
+
+```{r}
+stopifnot(require(gunsales))
+stopifnot(require(ggplot2))
+stopifnot(require(dplyr))
+
+gun_sales <- analysis()
+str(gun_sales[,1:12])
+
+```
+
+## Datasource 2: Gun ownership survey data - Washington Post
+
+```{r}
+library(XML)
+library(dplyr)
+gun_ownership_url = 'http://www.washingtonpost.com/wp-srv/health/interactives/guns/ownership.html'
+gun_ownership = readHTMLTable(gun_ownership_url, header = TRUE, which = 1)
+gun_ownership = gun_ownership[-1, ]
+
+parse_num = function (x) as.numeric(sub(',', '', x))
+gun_ownership = select(gun_ownership, State = 1, Total = 2, Yes = 3,
+                       `Yes %` = 4, No = 5, `No %` = 6) %>%
+                        mutate_each(funs(parse_num), -State)
+head(gun_ownership)
+```
+
+fix state names:
+```{r}
+gun_ownership = gun_ownership %>%
+    mutate(`Child access prevention` = grepl('\\*$', State),
+           State  = sub('\\*$', '', State))
+
+# Fix D.C. name
+gun_ownership[gun_ownership$State == 'The District', 'State'] = 'District of Columbia' 
+```
+
+## Datasource 3: Deaths due to firearms by state - Kaiser Family Foundation
+
+```{r}
+setwd("/Users/shilpasure/Documents/Grad School/Columbia/Spring 2017/Data Visualization/dataviz-forum/exercise_guns/exercise")
+
+gun_deaths <- read.csv("KFF_deaths_firearms.csv", skip = 3) %>%
+    select(State = 1, `Deaths per 100000` = 2)
+
+head(gun_deaths)
+```
+
+## Dataset 4: Gun-related deaths at the invidual level (2012-2014)
+
+```{r, warning=FALSE, comment=FALSE}
+library(readr)
+gun_inddeaths <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/guns-data/master/full_data.csv")
+gun_inddeaths <- gun_inddeaths[,2:dim(gun_inddeaths)[2]]
+
+head(gun_inddeaths)
+```
+
+## Questions
+
+# Question 1
+
+- Does gun ownership correlate with firearm deaths in the U.S.? Does the pattern hold only in the aggregate or also by state? 
+
+```{r}
+# use Washington post gun ownership for gun ownership by state
+head(gun_ownership)
+
+# In 2001 the Behavioral Risk Factor Surveillance System (BRFSS) in North Carolina surveyed 201,881 respondents nationwide, asking them, "Are any firearms now kept in or around your home? Include those kept in a garage, outdoor storage area, car, truck, or other motor vehicle." Here are the results.
+
+# use KFF data for Deaths per 100000 by state
+head(gun_deaths)
+
+gun_ownerships_deaths <- merge(gun_ownership, gun_deaths, by="State")
+
+colnames(gun_ownerships_deaths) <- c("State", "Total", "Yes", "Yes_perc", "No", "No_perc", "Child_access_prevention", "Deaths_per_100000")
+
+ggplot(gun_ownerships_deaths, aes(Yes_perc, Deaths_per_100000)) + geom_point() + geom_text(data=subset(gun_ownerships_deaths, Yes_perc < 10 & Deaths_per_100000 > 10 | Deaths_per_100000 > 17), aes(Yes_perc, Deaths_per_100000, label=State))
+```
+
+From this plot we can see that there is a clear positive correlation between the percentage of people who report owning a gun in their home and firearms deaths per state. Louisiana, Alaska, and Mississippi have the highest humber of firearms deaths per 100,000 people. Washington, DC is an unusual case of having a small percentage of people owning a gun but a relatively high number of gun deaths. 
+
+# Question 2
+
+- What is the pattern of gunsales over time?  
+
+```{r}
+
+ggplot(gun_sales, aes(factor(year), guns_total)) + geom_boxplot() 
+
+```
+
+From ths boxplot of gun sales by month (displayed by year), it appears that gun sales have been increasing overall between 2000 and 2016. There were unusually high sales in one month in 2012 and one month in 2015.
